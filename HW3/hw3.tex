@@ -1,0 +1,252 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1.2in]{geometry}
+\usepackage{graphicx}
+\usepackage{adjustbox}
+\usepackage{framed}
+\usepackage{epsfig}
+\usepackage{xspace}
+
+\def\answer#1{
+    \vspace*{0.5em}\\
+    \noindent\fbox{%
+    \parbox{\textwidth}{%
+		#1
+    }%
+}
+}
+
+\newcommand{\mycoursenum}{15-440/15-640}
+\newcommand{\myhwnum}{3}
+\newcommand{\myname}{}   % put your name here
+\newcommand{\myandrew}{}  % put your andrewID here
+
+\newif\ifprint
+\printfalse  % change to printfalse after adding your name and andrewID
+
+\def\changemargin#1#2{\list{}{\rightmargin#2\leftmargin#1}\item[]}
+\let\endchangemargin=\endlist 
+
+\begin{document}
+\medskip
+\thispagestyle{plain}
+\begin{center}
+{\Large \mycoursenum: Homework \myhwnum}\\
+Due: November 13, 2017 23:59 \\
+\medskip
+\begin{tabular}{| l p{3in}|}
+\hline
+Name: \myname& \\
+& \\ \hline
+Andrew ID: \myandrew & \\
+&\\
+\hline
+\end{tabular}
+\end{center}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{DIG (18 points)}
+In this problem, we will use dig tool available on Linux and Mac OS to explore DNS servers. You can
+read about it using \verb|man dig|. Recall that a DNS server higher in the DNS hierarchy delegates a DNS
+query to a DNS server lower in the hierarchy, by sending back to the DNS client the name of that
+lower-level DNS server (assuming no recursion is specified). \textbf{For each of the following questions, show the sequence of commands that you ran on your shell with dig and the output they generate.} \textit{Hint:} Be sure to use the \verb|+norecurse| option
+to dig, and remember that you will need to specify different target DNS servers (@) each time. Your
+queries should look like:\\
+\verb|dig +norecurse @< targetserver> RecordToResolve RecordType|.
+
+\begin{enumerate}
+\item Starting with a root DNS server (from one of the root servers [a-m].root-servers.net),  initiate a
+sequence of queries using dig for the A-type record for www.blog.xkcd.com without using recursion.
+Be sure to also show the list of the names of DNS servers in the entire delegation chain starting from
+the root in answering your query. \textbf{[5 points]}
+
+% uncomment this to add answer
+%\answer{
+%}
+
+\item  Repeat the same procedure as above for www.csd.cs.cmu.edu \textbf{[5 points]}
+% uncomment this to add answer
+%\answer{
+%}
+
+\item Repeat the same procedure for 81.183.132.209.in-addr.arpa. This time, dig for the PTR-type
+record. \textbf{[5 points]}
+% uncomment this to add answer
+%\answer{
+%}
+
+\item Use dig -x IP addr to perform reverse DNS lookup for the IP address 209.132.183.81. What
+is the domain name associated with this IP address? What is the type of the DNS record in the
+answer section? Compare the answer section to part 3¡¯s answer. \textbf{[3 points]}
+% uncomment this to add answer
+%\answer{
+%}
+
+\end{enumerate}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Hadoop and MapReduce (18 Points)}
+
+\begin{enumerate}
+\item MapReduce stores the Map output on the local disk of the Map worker. Why don¡¯t we write Map output to GFS here? Discuss the advantages and disadvantages. \textbf{[5 Points]}
+% uncomment this to add answer
+%\answer{
+%}
+
+\item Suppose we have a cluster of 100 nodes, and 2 of the machines were produced in 2007, while others were produced in 2017. Explain why a massive Hadoop MapReduce job might take longer to complete on 100 nodes, compared to only using the 98 2017-produced machines. \textbf{[5 Points]}
+% uncomment this to add answer
+%\answer{
+%}
+
+\item Sparse Matrix Multiplication using MapReduce:
+
+\begin{gather*}
+  \begin{bmatrix}
+  1 &  2 & 0 \\
+  3 &  4 & 0 \\
+  0 & 5 & 6 
+  \end{bmatrix}  \quad *
+  \begin{bmatrix}
+  0 &  1 \\
+  2 &  3 \\
+  4 & 0 
+  \end{bmatrix}  \\
+\end{gather*}
+
+Input file:
+\begin{verbatim}
+1 1 1 A
+1 2 2 A
+2 1 3 A
+2 2 4 A
+3 2 5 A
+3 3 6 A
+1 2 1 B
+2 1 2 B
+2 2 3 B
+3 1 4 B
+\end{verbatim}
+According to what you were taught in the lecture, write out the output of each Map and Reduce stage of the two stages (four in total) taught in the slides. \textbf{[8 Points]}
+% uncomment this to add answer
+%\answer{
+%}
+
+\end{enumerate}
+
+\section{GFS and Spanner (15 Points)}
+
+\begin{enumerate}
+\item Discuss the trade offs on selecting the default chunk size in GFS, i.e., list one advantage and one disadvantage of making the default chunk size 64MB instead of 4MB. \textbf{[5 Points]}
+% uncomment this to add answer
+%\answer{
+%}
+
+\item Google¡¯s GFS design was specialized for their target workload of batch processing of large-scale data,
+leading to a number of design simplifications that were not appropriate for the broader collection
+of workloads that later arose. Identify and briefly explain two drawbacks of the GFS design that
+interfered with effective support for a broader collection of applications. \textbf{[5 Points]}
+% uncomment this to add answer
+%\answer{
+%}
+
+\item Suppose in Spanner, one client does a Put, notifies another client, and the client that receives the notification performs a Get on the same key. How does Spanner ensure that the Get will see the Put¡¯s value? \textbf{[5 Points]}
+% uncomment this to add answer
+%\answer{
+%}
+
+\end{enumerate}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{P2P (17 Points)}
+% \question
+
+You've recently been hired as the distributed systems guru at a new game development company.  The company's flagship game, \emph{Luke Flukem Whoever}, is supposed to be a massively multiplayer first-person-shooter game.  The online world is expected to consist of thousands of players distributed around the world, and because the company is eliminating dedicated servers to save money, you are responsible for designing the peer-to-peer system for online play. 
+
+The game's initial design is to store data, such as other players and in-game objects, in a peer-to peer system that a player will query dynamically.  Your manager hears about a cool new idea called Chord, and suggests that you look into it, arguing that it provides a distributed hash lookup primitive and is robust to frequent node arrivals and departures.  Your manager argues that you can store in-game objects on peers (with replication to handle node departures) using Chord for scalable lookup of these in-game objects. 
+
+\begin{enumerate}
+\item 
+After giving it some thought, you decide that this is a poor solution for a first-person-shooter game where the peer-to-peer system may have thousands of geographically distant players in it.  Explain briefly the rationale for your decision. \textbf{[4 Points]}
+
+% uncomment this to add answer
+%\answer{
+%}
+
+\item The publisher, Eccentric Arts, decides that the game release date needs to be pushed up by 3 months.  Consequently, the game design slightly changes, and instead of all the players being in one very large world, players only connect with players in the same geographic city.  You now decide that Chord is a reasonable design choice for storing certain static in-game objects on peers.  
+
+You implement this system with ease and begin a small scale deployment consisting of only four peers.  The peers contain the listed items (e.g., \emph{Node 4} only has \emph{Item 3}), and have successor tables as shown (the $id+2^i$ column is there to remind you how the successor table is set up).
+
+List the nodes that will receive a query from \emph{node 1} for \emph{item 7}. \textbf{[5 Points]}
+
+\includegraphics[width=.65\textwidth]{lo_p2p_dht_chord}
+
+% uncomment this to add answer
+%\answer{
+%}
+
+\item List the nodes that will receive a query from \emph{node 2} for \emph{item 5}. \textbf{[4 Points]}
+
+% uncomment this to add answer
+%\answer{
+%}
+
+\item During larger-scale testing, you notice that the popularity of objects in your game is skewed, and that a small set of peers get overloaded with requests for the most popular items.  Like any good distributed systems student, you pull out a valuable tool from your distributed systems belt to reduce this load: caching.  
+
+Your manager likes this idea, and suggests that once an object is found, it should be propagated back down the path in the Chord ring taken to lookup the object on the forward path, with the item cached at each node along the way.  Your manager argues that this is an effective choice of nodes to replicate on because the nodes caching the object in this path will never have seen this object before.  Why is this true? \textbf{[4 Points]}
+
+% uncomment this to add answer
+%\answer{
+%}
+
+\end{enumerate}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Hashing (12 Points)}
+\begin{enumerate}
+
+\item Assume there are $M$ keys distributed across $N$ servers in perfect balance. For conventional hashing (divide as hash function) and consistent hashing (each server has $K$ virtual nodes) respectively, what's the number of keys migrated when one server is leaving the cluster? \textbf{[4 Points]}
+% uncomment this to add answer
+%\answer{
+%}
+
+\item Virtual node is a common variant of consistent hashing. Unlike what we are taught on 15-440 class, where each physical server is mapped to a random position on circle, a server keeps multiple (or even hundreds of) virtual nodes. Each virtual node is mapped to the circle and act as bucket individually. List \emph{two} potential advantages for keeping virtual nodes when using consistent hashing. \textbf{[4 Points]}
+% uncomment this to add answer
+%\answer{
+%}
+
+\item Alice is developing her own cloud storage system and considering implementing deduplication to reduce costs. She decided to compute the hash value for each block (4KB) to see if the same block has already existed. Her friend, Cheryl, who has taken 15-440, suggested using Rabin fingerprints to decide block boundaries. What supports Cheryl's argument?  \textbf{[4 Points]}
+% uncomment this to add answer
+%\answer{
+%}
+
+\end{enumerate}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{CDN (12 Points)}
+\begin{enumerate}
+\item David loves reading news from \texttt{cnn.com}, which is accelerated by Akamai. When he just traveled from Pittsburgh to the west coast, he noticed that it took longer to load all images on web pages.  What may be the cause of the phenomenon? Also briefly describe a way to verify it. Assume David travels very fast (maybe by supersonic aircraft) and Akamai serves content as described in 15-440 lectures. \textbf{[7 Points]}
+% uncomment this to add answer
+%\answer{
+%}
+
+\item Kevin has developed a super marvelous online collaborative editor (similar to Google Docs) on a server located in CMU campus. However, his friends reported that user experience was poor when using it outside US. Kevin remembered that he had been taught on 15-440 course that CDN can help accelerate his website, and decided to buy the service from Akamai. Do you agree with his decision? If yes, describe how Akamai can improve the user experience; Otherwise, tell Kevin what are the challenges. \textbf{[5 Points]}
+% uncomment this to add answer
+%\answer{
+%}
+
+
+\end{enumerate}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\clearpage
+
+\end{document}
