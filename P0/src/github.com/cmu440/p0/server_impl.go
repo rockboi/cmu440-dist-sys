@@ -166,7 +166,13 @@ func (kvs *keyValueServer) RequestHandler(clientRequest *ClientRequest, resChan 
 		kvs.writelock <- 1
 		resChan <- ""
 	}
-
+	else if (clientRequest.reqType == DELRequest) {
+		//delete key
+		delete(clientRequest.key)
+	}
+	else {
+		// throw error
+	}
 }
 
 func (kvs *keyValueServer) Close() {
