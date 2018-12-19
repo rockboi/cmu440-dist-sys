@@ -15,9 +15,11 @@ type keyValueServer struct {
         port int
 	globalreqchan chan *ClientHandle
 	writelock chan int
+	activeconns int
+	droppedconns int
 }
 
-type ReaderCloser interface {
+type ReaderWriterCloser interface {
 	Read(p []byte) (n int, err error)
 	Write(p []byte) error
 	Close() error
@@ -55,6 +57,7 @@ func New() KeyValueServer {
 }
 
 func (kvs *keyValueServer) Start(port int) error {
+	init_db()
 	kvs.InitServer(port)
         go kvs.StartListeningForConn()
 	go kvs.ProcessRequests()
@@ -66,6 +69,8 @@ func (kvs *keyValueServer) InitServer(port int) error {
 	kvs.globalreqchan = make(chan *ClientHandle)
 	kvs.writelock = make(chan int, 1)
 	kvs.writelock <- 1
+	kvs.activeconns = 0
+	kvs.droppedconns = 0
 }
 
 func (kvs *keyValueServer) StartListeningForConn() {
@@ -87,7 +92,8 @@ func (kvs *keyValueServer) StartListeningForConn() {
 	fmt.Println("All done")
 }
 
-func (kvs *keyValueServer) handleConn(conn ReaderCloser) {
+func (kvs *keyValueServer) handleConn(conn ReaderWriterCloser) {
+	kvs.activeconns++
 	fmt.Println("Reading once from connection")
 
 	var buf[1024] byte
@@ -105,7 +111,7 @@ func (kvs *keyValueServer) handleConn(conn ReaderCloser) {
 		clientHandle.reqChan <- ParseClientMessage(string(buf[0:n]))
 		conn.Write(<-clientHandle.resChan)
 	}
-
+	kvs.droppedconns++
 }
 
 func ParseClientMessage(msg string) (clientReq *ClientRequest, err error) {
@@ -126,9 +132,9 @@ func ParseClientMessage(msg string) (clientReq *ClientRequest, err error) {
 		clientReq.value = vals[2]
 	}
 	else {
-		// throw error
+		return 0, fmt.Errorf("Unknown request type %s", vals[0])
 	}
-	return clientReq, err
+	return clientReq, nil
 
 }
 
@@ -154,8 +160,9 @@ func ConvertToSingleString(dbvalues []([]byte)) string {
 	return finalstr
 }
 
-func (kvs *keyValueServer) RequestHandler(clientRequest *ClientRequest, resChan chan string) {
+func (kvs *keyValueServer) RequestHandler(clientRequest *ClientRequest, resChan chan string) error {
 	if (clientRequest.reqType == GETRequest) {
+		// get all values associated with key
 		resChan <- ConvertToSingleString(get(clientRequest.key))
 	}
 	else if (clientRequest.reqType == PUTRequest) {
@@ -169,24 +176,23 @@ func (kvs *keyValueServer) RequestHandler(clientRequest *ClientRequest, resChan 
 	else if (clientRequest.reqType == DELRequest) {
 		//delete key
 		delete(clientRequest.key)
+		resChan <- ""
 	}
 	else {
-		// throw error
+		return 0, fmt.Errorf("Unsupported request type %g", clientRequest.reqType)
 	}
+	return nil
 }
 
 func (kvs *keyValueServer) Close() {
-	// TODO: implement this!
+	// TODO
+	// Signal all channels to close?
 }
 
 func (kvs *keyValueServer) CountActive() int {
-	// TODO: implement this!
-	return -1
+	return kvs.activeconns
 }
 
 func (kvs *keyValueServer) CountDropped() int {
-	// TODO: implement this!
-	return -1
+	return kvs.droppedconns
 }
-
-// TODO: add additional methods/functions below!
