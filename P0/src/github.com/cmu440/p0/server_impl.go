@@ -3,20 +3,19 @@
 package p0
 
 import (
-        "fmt"
-        "net"
-        "os"
-        "strconv"
+	"fmt"
+	"net"
+	"os"
+	"strconv"
 	"strings"
 )
 
-
 type keyValueServer struct {
-        port int
+	port          int
 	globalreqchan chan *ClientHandle
-	writelock chan int
-	activeconns int
-	droppedconns int
+	writelock     chan int
+	activeconns   int
+	droppedconns  int
 }
 
 type ReaderWriterCloser interface {
@@ -28,16 +27,16 @@ type ReaderWriterCloser interface {
 type ClientRequestType int
 
 const (
-	GETRequest ClientRequestType = 0
-	PUTRequest ClientRequestType = 1
-	DELRequest ClientRequestType = 2
-	SlowClientsBuffer int = 500
+	GETRequest        ClientRequestType = 0
+	PUTRequest        ClientRequestType = 1
+	DELRequest        ClientRequestType = 2
+	SlowClientsBuffer int               = 500
 )
 
 type ClientRequest struct {
 	reqType ClientRequestType
-	key string
-	value string
+	key     string
+	value   string
 }
 
 type ClientHandle struct {
@@ -60,7 +59,7 @@ func New() KeyValueServer {
 func (kvs *keyValueServer) Start(port int) error {
 	init_db()
 	kvs.InitServer(port)
-        go kvs.StartListeningForConn()
+	go kvs.StartListeningForConn()
 	go kvs.ProcessRequests()
 	return nil
 }
@@ -76,8 +75,8 @@ func (kvs *keyValueServer) InitServer(port int) error {
 }
 
 func (kvs *keyValueServer) StartListeningForConn() {
-	ln, err := net.Listen("tcp", ":" + strconv.Itoa(kvs.port))
-        if err != nil {
+	ln, err := net.Listen("tcp", ":"+strconv.Itoa(kvs.port))
+	if err != nil {
 		fmt.Println("Error on listen: ", err)
 		os.Exit(-1)
 	}
@@ -88,7 +87,7 @@ func (kvs *keyValueServer) StartListeningForConn() {
 		if err != nil {
 			fmt.Println("Couldn't accept: ", err)
 			os.Exit(-1)
-	}
+		}
 		go kvs.handleConn(conn)
 	}
 	fmt.Println("All done")
@@ -98,7 +97,7 @@ func (kvs *keyValueServer) handleConn(conn ReaderWriterCloser) {
 	kvs.activeconns++
 	fmt.Println("Reading once from connection")
 
-	var buf[1024] byte
+	var buf [1024]byte
 	clientHandle := new(ClientHandle)
 	clientHandle.Init()
 	kvs.globalreqchan <- clientHandle
@@ -129,13 +128,13 @@ func ParseClientMessage(msg string) (clientReq *ClientRequest, err error) {
 	var cleanmsg = strings.TrimSuffix(msg, "\n")
 	vals := strings.Split(cleanmsg, ",")
 	clientReq = new(ClientRequest)
-	if (strings.Compare(vals[0], "get") == 0) {
+	if strings.Compare(vals[0], "get") == 0 {
 		clientReq.reqType = GETRequest
 		clientReq.key = vals[1]
-	} else if (strings.Compare(vals[0], "delete") == 0) {
+	} else if strings.Compare(vals[0], "delete") == 0 {
 		clientReq.reqType = DELRequest
 		clientReq.key = vals[1]
-	} else if (strings.Compare(vals[0], "put") == 0) {
+	} else if strings.Compare(vals[0], "put") == 0 {
 		clientReq.reqType = PUTRequest
 		clientReq.key = vals[1]
 		clientReq.value = vals[2]
@@ -169,12 +168,12 @@ func ConvertToSingleString(dbvalues []([]byte)) string {
 }
 
 func (kvs *keyValueServer) RequestHandler(clientRequest *ClientRequest, resChan chan string) error {
-	if (clientRequest.reqType == GETRequest) {
+	if clientRequest.reqType == GETRequest {
 		// get all values associated with key
 		respStr := ConvertToSingleString(get(clientRequest.key))
 		fmt.Printf("GET request, key: %s, value: %s.\n", clientRequest.key, respStr)
 		resChan <- respStr
-	} else if (clientRequest.reqType == PUTRequest) {
+	} else if clientRequest.reqType == PUTRequest {
 		// take lock on server
 		<-kvs.writelock
 		fmt.Printf("PUT request, key: %s, value: %s.\n", clientRequest.key, clientRequest.value)
@@ -182,7 +181,7 @@ func (kvs *keyValueServer) RequestHandler(clientRequest *ClientRequest, resChan 
 		// give back lock
 		kvs.writelock <- 1
 		resChan <- ""
-	} else if (clientRequest.reqType == DELRequest) {
+	} else if clientRequest.reqType == DELRequest {
 		//delete key
 		fmt.Printf("DELETE request, key: %s.\n", clientRequest.key)
 		clear(clientRequest.key)
