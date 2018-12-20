@@ -14,6 +14,7 @@ type keyValueServer struct {
 	port          int
 	globalreqchan chan *ClientHandle
 	writelock     chan int
+	accesslock    chan int
 	activeconns   int
 	droppedconns  int
 }
@@ -68,6 +69,8 @@ func (kvs *keyValueServer) InitServer(port int) error {
 	kvs.port = port
 	kvs.globalreqchan = make(chan *ClientHandle)
 	kvs.writelock = make(chan int, 1)
+	kvs.accesslock = make(chan int, 1)
+	kvs.accesslock <- 1
 	kvs.writelock <- 1
 	kvs.activeconns = 0
 	kvs.droppedconns = 0
@@ -94,15 +97,17 @@ func (kvs *keyValueServer) StartListeningForConn() {
 }
 
 func (kvs *keyValueServer) handleConn(conn ReaderWriterCloser) {
+	// take lock for changing shared state
+	<-kvs.accesslock
 	kvs.activeconns++
+	kvs.accesslock <- 1
+
 	fmt.Println("Reading once from connection")
 
 	var buf [1024]byte
 	clientHandle := new(ClientHandle)
 	clientHandle.Init()
 	kvs.globalreqchan <- clientHandle
-	// n, _ := conn.Read(buf[:])
-	// fmt.Println("Client sent: ", string(buf[0:n]))
 
 	for {
 		n, err := conn.Read(buf[:])
@@ -119,8 +124,12 @@ func (kvs *keyValueServer) handleConn(conn ReaderWriterCloser) {
 		clientRes := <-clientHandle.resChan
 		conn.Write([]byte(clientRes))
 	}
+
+	// take lock for changing shared state
+	<-kvs.accesslock
 	kvs.activeconns--
 	kvs.droppedconns++
+	kvs.accesslock <- 1
 }
 
 func ParseClientMessage(msg string) (clientReq *ClientRequest, err error) {
