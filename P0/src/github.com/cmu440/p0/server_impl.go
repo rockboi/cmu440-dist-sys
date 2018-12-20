@@ -168,10 +168,10 @@ func (kvs *keyValueServer) ClientHandler(clientHandle *ClientHandle) error {
 	return nil
 }
 
-func ConvertToSingleString(dbvalues []([]byte)) string {
+func ConvertToSingleString(dbkey string, dbvalues []([]byte)) string {
 	finalstr := ""
 	for _, val := range dbvalues {
-		finalstr += (string(val[:]) + "\n")
+		finalstr += (dbkey + "," + string(val[:]) + "\n")
 	}
 	return finalstr
 }
@@ -179,7 +179,7 @@ func ConvertToSingleString(dbvalues []([]byte)) string {
 func (kvs *keyValueServer) RequestHandler(clientRequest *ClientRequest, resChan chan string) error {
 	if clientRequest.reqType == GETRequest {
 		// get all values associated with key
-		respStr := ConvertToSingleString(get(clientRequest.key))
+		respStr := ConvertToSingleString(clientRequest.key, get(clientRequest.key))
 		fmt.Printf("GET request, key: %s, value: %s.\n", clientRequest.key, respStr)
 		resChan <- respStr
 	} else if clientRequest.reqType == PUTRequest {
